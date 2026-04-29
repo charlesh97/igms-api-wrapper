@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from igms_wrapper.client import IGMSClient, IGMSConfig, normalize_human_name
+from igms_wrapper.client import IGMSClient, IGMSConfig, _has_next_page, normalize_human_name
 
 
 class FakeResponse:
@@ -53,6 +53,11 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(session.calls[0]["params"]["page"], 1)
         self.assertEqual(session.calls[1]["params"]["page"], 2)
 
+    def test_has_next_page_treats_falsey_strings_and_zero_as_false(self):
+        self.assertFalse(_has_next_page({"meta": {"has_next_page": "false"}}, 1, 1))
+        self.assertFalse(_has_next_page({"meta": {"hasNextPage": "0"}}, 1, 1))
+        self.assertFalse(_has_next_page({"meta": {"next_page": 0}}, 1, 1))
+
     def test_find_helpers_use_normalized_name_matching(self):
         client = IGMSClient(config=IGMSConfig(access_token="token-123"), session=FakeSession([]))
         properties = [
@@ -69,6 +74,12 @@ class ClientTests(unittest.TestCase):
 
         self.assertEqual(property_match["property_uid"], "p2")
         self.assertEqual(listing_match["listing_uid"], "l1")
+
+    def test_find_helpers_respect_explicit_empty_collections(self):
+        client = IGMSClient(config=IGMSConfig(access_token="token-123"), session=FakeSession([]))
+
+        self.assertIsNone(client.find_property_by_name("missing", properties=[]))
+        self.assertIsNone(client.find_listing_by_name("missing", listings=[]))
 
     def test_normalize_human_name_collapses_punctuation(self):
         self.assertEqual(normalize_human_name("Frosty Pines Cabin: 2br Retreat"), "frosty pines cabin 2br retreat")

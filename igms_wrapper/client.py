@@ -104,13 +104,13 @@ def _has_next_page(payload: Any, page: int, record_count: int) -> bool:
     if explicit is None:
         explicit = meta.get("hasNextPage")
     if explicit is not None:
-        return bool(explicit)
+        return _coerce_meta_flag(explicit)
 
     next_page = meta.get("next_page")
     if next_page is None:
         next_page = meta.get("nextPage")
     if next_page is not None:
-        return bool(next_page)
+        return _coerce_meta_flag(next_page)
 
     meta_page = meta.get("page")
     if isinstance(meta_page, int) and meta_page > page:
@@ -121,6 +121,21 @@ def _has_next_page(payload: Any, page: int, record_count: int) -> bool:
         return page < total_pages
 
     return record_count > 0
+
+
+def _coerce_meta_flag(value: Any) -> bool:
+    """Coerce common API pagination flag shapes to a boolean."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return value != 0
+    if isinstance(value, str):
+        normalized = value.strip().casefold()
+        if normalized in {"", "0", "false", "f", "no", "n", "none", "null"}:
+            return False
+        if normalized in {"1", "true", "t", "yes", "y"}:
+            return True
+    return bool(value)
 
 
 @dataclass
@@ -260,7 +275,7 @@ class IGMSClient:
     ) -> dict[str, Any] | None:
         """Find a property by fuzzy name match."""
         return _find_by_name(
-            properties or self.get_all_properties(),
+            properties if properties is not None else self.get_all_properties(),
             name,
             keys=("name", "property_name", "address"),
         )
@@ -273,7 +288,7 @@ class IGMSClient:
     ) -> dict[str, Any] | None:
         """Find a listing by fuzzy name match."""
         return _find_by_name(
-            listings or self.get_all_listings(),
+            listings if listings is not None else self.get_all_listings(),
             name,
             keys=("listing_name", "property_name", "name"),
         )

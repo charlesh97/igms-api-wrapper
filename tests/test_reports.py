@@ -133,6 +133,20 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(len(payload["properties"]), 1)
         self.assertIn("new_bookings", payload["properties"][0])
 
+    def test_build_portfolio_status_accepts_list_calendar_payload(self):
+        class ListCalendarClient(FakeClient):
+            def get_calendar(self, property_uid, from_date, to_date):
+                return [
+                    {"is_available": 1, "price": 100},
+                    {"is_available": 0, "price": 200},
+                ]
+
+        status = build_portfolio_status(ListCalendarClient(), today=date(2026, 4, 26), days=2, state_file=None, write_state=False)
+        prop = status.properties[0]
+        self.assertEqual(prop.next_7d_available, 1)
+        self.assertEqual(prop.next_7d_blocked, 1)
+        self.assertEqual(prop.next_7d_avg_price, 150.0)
+
 
 if __name__ == "__main__":
     unittest.main()

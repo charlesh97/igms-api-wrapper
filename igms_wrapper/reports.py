@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 import json
 
-from .client import IGMSClient
+from .client import IGMSClient, _records_from_payload
 
 
 ACTIVE_BOOKING_STATUSES = {"accepted", "confirmed", "pending", "requested"}
@@ -266,7 +266,7 @@ def build_portfolio_status(
         future_checkins.sort(key=lambda item: item[0])
         future_checkouts.sort(key=lambda item: item[0])
 
-        calendar = client.get_calendar(property_uid, today.isoformat(), end.isoformat()).get("data", [])
+        calendar = _records_from_payload(client.get_calendar(property_uid, today.isoformat(), end.isoformat()))
         available = sum(1 for row in calendar if row.get("is_available") == 1)
         blocked = len(calendar) - available
         prices = [row.get("price") for row in calendar if isinstance(row.get("price"), (int, float))]

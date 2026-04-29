@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import unittest
 
-from igms_wrapper.cli import build_parser
+from igms_wrapper.cli import build_parser, main
 
 
 class CLITests(unittest.TestCase):
@@ -29,6 +31,13 @@ class CLITests(unittest.TestCase):
         self.assertEqual(args.cmd, "status")
         self.assertEqual(args.days, 14)
         self.assertTrue(args.as_json)
+
+    def test_main_returns_2_for_invalid_json_filters(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            exit_code = main(["bookings", "--filters", "{not-json}"])
+        self.assertEqual(exit_code, 2)
+        self.assertIn("Invalid JSON", stderr.getvalue())
 
 
 if __name__ == "__main__":

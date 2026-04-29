@@ -5,6 +5,8 @@ import json
 import sys
 from typing import Any
 
+import requests
+
 from .client import IGMSClient, build_auth_url, exchange_code, generate_secret
 from .config import IGMSConfig
 from .reports import build_portfolio_status, format_portfolio_status_text, portfolio_status_to_dict
@@ -13,7 +15,10 @@ from .reports import build_portfolio_status, format_portfolio_status_text, portf
 def _json_arg(value: str | None) -> dict[str, Any]:
     if not value:
         return {}
-    parsed = json.loads(value)
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON: {exc.msg}") from exc
     if not isinstance(parsed, dict):
         raise ValueError("Expected a JSON object")
     return parsed
@@ -83,76 +88,82 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
+    try:
+        args = parser.parse_args(argv)
+        config = IGMSConfig.from_env()
 
-    config = IGMSConfig.from_env()
+        if args.cmd == "generate-secret":
+            print(generate_secret())
+            return 0
 
-    if args.cmd == "generate-secret":
-        print(generate_secret())
-        return 0
+        if args.cmd == "auth-url":
+            print(build_auth_url(config))
+            return 0
 
-    if args.cmd == "auth-url":
-        print(build_auth_url(config))
-        return 0
+        if args.cmd == "exchange":
+            _print_payload(exchange_code(args.code, config))
+            return 0
 
-    if args.cmd == "exchange":
-        _print_payload(exchange_code(args.code, config))
-        return 0
+        client = IGMSClient(config=config)
 
-    client = IGMSClient(config=config)
+        if args.cmd == "properties":
+            _print_payload(client.get_properties(page=args.page))
+            return 0
 
-    if args.cmd == "properties":
-        _print_payload(client.get_properties(page=args.page))
-        return 0
+        if args.cmd == "listings":
+            _print_payload(client.get_listings(page=args.page))
+            return 0
 
-    if args.cmd == "listings":
-        _print_payload(client.get_listings(page=args.page))
-        return 0
+        if args.cmd == "bookings":
+            _print_payload(client.get_bookings(page=args.page, **_json_arg(args.filters)))
+            return 0
 
-    if args.cmd == "bookings":
-        _print_payload(client.get_bookings(page=args.page, **_json_arg(args.filters)))
-        return 0
+        if args.cmd == "calendar":
+            _print_payload(client.get_calendar(args.property_uid, args.from_date, args.to_date))
+            return 0
 
-    if args.cmd == "calendar":
-        _print_payload(client.get_calendar(args.property_uid, args.from_date, args.to_date))
-        return 0
+        if args.cmd == "threads":
+            _print_payload(client.get_threads(page=args.page, **_json_arg(args.filters)))
+            return 0
 
-    if args.cmd == "threads":
-        _print_payload(client.get_threads(page=args.page, **_json_arg(args.filters)))
-        return 0
+        if args.cmd == "find-property":
+            _print_payload(client.find_property_by_name(args.name))
+            return 0
 
-    if args.cmd == "find-property":
-        _print_payload(client.find_property_by_name(args.name))
-        return 0
+        if args.cmd == "find-listing":
+            _print_payload(client.find_listing_by_name(args.name))
+            return 0
 
-    if args.cmd == "find-listing":
-        _print_payload(client.find_listing_by_name(args.name))
-        return 0
+        if args.cmd == "api":
+            response = client.request(
+                args.path,
+                method=args.method,
+                params=_json_arg(args.params),
+                json_body=_json_arg(args.body) if args.body else None,
+            )
+            print(f"URL: {response.url}")
+            print(f"HTTP {response.status_code}")
+            _print_payload(response.payload)
+            return 0
 
-    if args.cmd == "api":
-        response = client.request(
-            args.path,
-            method=args.method,
-            params=_json_arg(args.params),
-            json_body=_json_arg(args.body) if args.body else None,
-        )
-        print(f"URL: {response.url}")
-        print(f"HTTP {response.status_code}")
-        _print_payload(response.payload)
-        return 0
+        if args.cmd == "status":
+            status = build_portfolio_status(
+                client,
+                days=args.days,
+                state_file=args.state_file,
+                write_state=not args.no_write_state,
+            )
+            if args.as_json:
+                _print_payload(portfolio_status_to_dict(status))
+            else:
+                print(format_portfolio_status_text(status))
+            return 0
 
-    if args.cmd == "status":
-        status = build_portfolio_status(
-            client,
-            days=args.days,
-            state_file=args.state_file,
-            write_state=not args.no_write_state,
-        )
-        if args.as_json:
-            _print_payload(portfolio_status_to_dict(status))
-        else:
-            print(format_portfolio_status_text(status))
-        return 0
-
-    parser.print_help(sys.stderr)
-    return 1
+        parser.print_help(sys.stderr)
+        return 1
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 2
+    except requests.RequestException as exc:
+        print(f"Request failed: {exc}", file=sys.stderr)
+        return 1

@@ -41,6 +41,11 @@ igms bookings --filters '{"booking_status":"accepted"}'
 igms calendar --property-uid 'UID' --from-date 2026-04-29 --to-date 2026-05-06
 igms threads
 
+# Messaging
+igms send-message --message 'Hi! Just confirming your arrival time.' --thread-id 'THREAD_UID'
+igms send-message --message 'Welcome!' --booking-uid 'BOOKING_UID' --channel email
+igms message-status --message-uid 'MESSAGE_UID'
+
 # Name lookup
 igms find-property 'Frosty Pines'
 igms find-listing 'Close to DC'
@@ -67,6 +72,14 @@ calendar = client.get_calendar("PROPERTY_UID", "2026-04-29", "2026-05-06")
 
 # Name lookup
 match = client.find_property_by_name("Frosty Pines")
+
+# Messaging — send a reply to a booking's main guest
+result = client.message_booking_guest(
+    "Hi! Just confirming your arrival time.",
+    thread_id="THREAD_UID",
+)
+message_uid = result.get("message_uid")  # actual key depends on API response
+status = client.get_message_status(message_uid)
 
 # Portfolio status summary
 status = build_portfolio_status(client, days=7)

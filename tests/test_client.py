@@ -84,6 +84,51 @@ class ClientTests(unittest.TestCase):
     def test_normalize_human_name_collapses_punctuation(self):
         self.assertEqual(normalize_human_name("Frosty Pines Cabin: 2br Retreat"), "frosty pines cabin 2br retreat")
 
+    def test_message_booking_guest_posts_json_body_with_thread_id(self):
+        session = FakeSession([FakeResponse({"message_uid": "msg-1"})])
+        client = IGMSClient(config=IGMSConfig(access_token="token-123"), session=session)
+
+        payload = client.message_booking_guest("Hi there!", thread_id="thread-9")
+
+        self.assertEqual(payload, {"message_uid": "msg-1"})
+        call = session.calls[0]
+        self.assertEqual(call["method"], "POST")
+        self.assertEqual(call["url"], "https://www.igms.com/api/v1/message-booking-guest")
+        self.assertEqual(call["params"]["access_token"], "token-123")
+        self.assertEqual(call["json"], {"message": "Hi there!", "thread_id": "thread-9"})
+
+    def test_message_booking_guest_with_booking_uid_and_channel(self):
+        session = FakeSession([FakeResponse({"ok": True})])
+        client = IGMSClient(config=IGMSConfig(access_token="token-123"), session=session)
+
+        client.message_booking_guest("Hello", booking_uid="bk-5", channel="email")
+
+        call = session.calls[0]
+        self.assertEqual(call["method"], "POST")
+        self.assertEqual(call["json"], {"message": "Hello", "booking_uid": "bk-5", "channel": "email"})
+
+    def test_message_booking_guest_requires_target_and_nonempty_message(self):
+        client = IGMSClient(config=IGMSConfig(access_token="token-123"), session=FakeSession([]))
+
+        with self.assertRaises(ValueError):
+            client.message_booking_guest("Hi")
+        with self.assertRaises(ValueError):
+            client.message_booking_guest("", thread_id="thread-9")
+        with self.assertRaises(ValueError):
+            client.message_booking_guest("   ", booking_uid="bk-5")
+
+    def test_get_message_status_passes_message_uid(self):
+        session = FakeSession([FakeResponse({"status": "sent"})])
+        client = IGMSClient(config=IGMSConfig(access_token="token-123"), session=session)
+
+        payload = client.get_message_status("msg-1")
+
+        self.assertEqual(payload, {"status": "sent"})
+        call = session.calls[0]
+        self.assertEqual(call["method"], "GET")
+        self.assertEqual(call["url"], "https://www.igms.com/api/v1/message-status")
+        self.assertEqual(call["params"]["message_uid"], "msg-1")
+
 
 if __name__ == "__main__":
     unittest.main()

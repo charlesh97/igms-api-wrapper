@@ -221,6 +221,56 @@ class IGMSClient:
         params = {"page": page, **filters}
         return self.request("/api/v1/get-threads", params=params).payload
 
+    def message_booking_guest(
+        self,
+        message: str,
+        *,
+        thread_id: str | None = None,
+        booking_uid: str | None = None,
+        channel: str | None = None,
+    ) -> Any:
+        """Send a message to the main guest of a booking.
+
+        Args:
+            message: The message text. Length may be limited for certain channel types.
+            thread_id: Thread ID. Required unless booking_uid is provided.
+            booking_uid: UID of a booking. Required unless thread_id is provided.
+            channel: Channel type — 'email' for direct bookings, 'platform' for
+                other platforms (default).
+
+        Returns the API payload, which typically includes the sent message UID
+        (usable with get_message_status).
+        """
+        if not thread_id and not booking_uid:
+            raise ValueError("Provide either thread_id or booking_uid to send a message")
+        if not message.strip():
+            raise ValueError("message must not be empty")
+
+        body: dict[str, Any] = {"message": message}
+        if thread_id:
+            body["thread_id"] = thread_id
+        if booking_uid:
+            body["booking_uid"] = booking_uid
+        if channel:
+            body["channel"] = channel
+
+        return self.request(
+            "/api/v1/message-booking-guest",
+            method="POST",
+            json_body=body,
+        ).payload
+
+    def get_message_status(self, message_uid: str) -> Any:
+        """Get the delivery status of a message sent via message_booking_guest.
+
+        Args:
+            message_uid: UID of the message (returned by message_booking_guest).
+        """
+        return self.request(
+            "/api/v1/message-status",
+            params={"message_uid": message_uid},
+        ).payload
+
     # --- Pagination helpers ---
 
     def iter_paginated(

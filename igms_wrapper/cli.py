@@ -69,6 +69,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_threads.add_argument("--page", type=int, default=1)
     p_threads.add_argument("--filters", help='JSON filter object, e.g. {"bookingsUids":"abc"}')
 
+    p_send = sub.add_parser("send-message", help="Send a message to a booking's main guest")
+    p_send.add_argument("--message", required=True, help="Message text")
+    p_send.add_argument("--thread-id", help="Thread ID (required unless --booking-uid given)")
+    p_send.add_argument("--booking-uid", help="Booking UID (required unless --thread-id given)")
+    p_send.add_argument("--channel", help="Channel: 'email' for direct bookings, 'platform' otherwise")
+
+    p_msg_status = sub.add_parser("message-status", help="Get status of a sent message")
+    p_msg_status.add_argument("--message-uid", required=True, help="UID returned by send-message")
+
     # Name lookup
     p_find_property = sub.add_parser("find-property", help="Find a property by name")
     p_find_property.add_argument("name")
@@ -124,6 +133,21 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.cmd == "threads":
             _print_payload(client.get_threads(page=args.page, **_json_arg(args.filters)))
+            return 0
+
+        if args.cmd == "send-message":
+            _print_payload(
+                client.message_booking_guest(
+                    args.message,
+                    thread_id=args.thread_id,
+                    booking_uid=args.booking_uid,
+                    channel=args.channel,
+                )
+            )
+            return 0
+
+        if args.cmd == "message-status":
+            _print_payload(client.get_message_status(args.message_uid))
             return 0
 
         if args.cmd == "find-property":

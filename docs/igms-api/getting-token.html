@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Getting a Token</title>
+
+    <meta name="description" content="Advanced Guest Management System supporting multiple airbnb accounts">
+    <meta name="author" content="iGMS">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+    <link rel="icon" type="image/png" href="/docs/assets/img/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/docs/assets/img/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/docs/assets/img/favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="apple-touch-icon" sizes="57x57" href="/docs/assets/img/favicons/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/docs/assets/img/favicons/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/docs/assets/img/favicons/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/docs/assets/img/favicons/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/docs/assets/img/favicons/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/docs/assets/img/favicons/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/docs/assets/img/favicons/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/docs/assets/img/favicons/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/docs/assets/img/favicons/apple-touch-icon-180x180.png">
+
+    <link rel="stylesheet" href="/docs/assets/css/style.min.css">
+    <link rel="stylesheet" href="/docs/assets/css/custom.css">
+    <script src="/docs/assets/js/modernizr.js"></script>
+
+    <!--suppress CommaExpressionJS -->
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    </script>
+</head>
+
+<body class="">
+<!--[if lt IE 8]>
+<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+<![endif]-->
+<!-- Preloader: uncomment this if you want to show a smooth preloader while the page is loading. Don't forget to add the 'js-preload-me' class on the <body> tag. -->
+<!-- <div class="preloader js-preloader"><div class="preloader-animation"></div></div>
+-->
+<!-- End of Preloader -->
+<div class="page js-page ">
+    <!-- Header -->
+    <div class="header header-over large">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-sm-6 col-xs-6">
+                    <!-- Logo Image -->
+                    <a href="/" class="branding-logo logo-image logo-animated">
+                        <img src="/docs/assets/img/logos/logo.png" alt="iGMS" title="iGMS">
+                    </a>
+                    <!-- End of Logo Image -->
+                </div>
+                <div class="col-md-9 col-sm-6 col-xs-6">
+                    <!-- Menu -->
+                    <nav class="right helper">
+                        <ul class="menu sf-menu js-menu">
+                            <li>
+                                <!--suppress HtmlUnknownTarget -->
+                                <a href="/features/">Features</a>
+                            </li>
+                            <li>
+                                <!--suppress HtmlUnknownTarget -->
+                                <a href="/our-team/">About Us</a>
+                            </li>
+                            <li>
+                                <!--suppress HtmlUnknownTarget -->
+                                <a href="/pricing/">Pricing</a>
+                            </li>
+                            <li>
+                                <a href="/app/login.html">My Account</a>
+                            </li>
+                            <li>
+                                <!--suppress HtmlUnknownTarget -->
+                                <a href="/blog/">Airbnb Tips</a>
+                            </li>
+                            <li>
+                                <!--suppress HtmlUnknownTarget -->
+                                <a href="/contact-us/">Contact</a>
+                            </li>
+                            <li>
+                                <!--suppress HtmlUnknownTarget -->
+                                <a href="/software/demo">Free Demo</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <!-- End of Menu -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Header -->
+    <!-- Header Back -->
+    <div class="header-back header-back-simple header-back-small">
+        <div class="header-back-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- Page Info -->
+                        <div class="page-info page-info-simple">
+                            <h1 class="page-title">Getting a Token</h1>
+                                                            <h2 class="page-description">How to obtain an iGMS API token</h2>
+                                                    </div>
+                        <!-- End Page Info -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Header Back -->
+    <div id="content">
+        <div class="container">
+            <div class="layout with-right-sidebar js-layout">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="main-content">
+                                                        <p>Before requesting any tokens, you need to be a registered <a href="/app/developer-program.html">developer program</a> participant. After this, using the same page, you can start registering applications and use them for obtaining access tokens from AirGMS users.</p>
+<p>To obtain access token, you need to perform two steps:</p>
+<ul>
+<li>Get authorization from iGMS user</li>
+<li>Get access token based on authorization code</li>
+</ul>
+<h2>Getting a user authorization</h2>
+<p>The first step is to get authorization from the user. Point iGMS user to this page (line breaks added for better readability):</p>
+<pre><code>https://igms.com//app/auth.html?
+    client_id=CLIENT_ID
+    &amp;redirect_uri=REDIRECT_URI
+    &amp;scope=SCOPE
+    &amp;state=STATE
+</code></pre>
+<ul>
+<li><strong>client_id=CLIENT_ID</strong> - The client ID you received when you first created the application (labeled as "client_id" in the list of your applications)</li>
+<li><strong>redirect_uri=REDIRECT_URI</strong> - Indicates the URI to return the user to after authorization is complete (labeled as "redirect_uri" in the list of applications)</li>
+<li><strong>scope=SCOPE</strong> - One or more scope values indicating which parts of the user's account you wish to access. When you need to use more than one scope, present them as a comma-separated string, i.e. <code>scope=tasks,listings</code>. As for now, these scopes are available:<ul>
+<li><code>tasks</code>: gives you access to company info, list of team members and tasks assigned to them</li>
+<li><code>messaging</code>: gives you access to view listings, bookings, guests, hosts, and to send messages to booking guests</li>
+<li><code>listings</code>: gives you access to view listings, hosts, and to change status of listings (to listed/unlisted)</li>
+<li><code>calendar-control</code>: gives you access to change calendars’ data (prices, currency, availability, minimum stay)</li>
+<li><code>direct-bookings</code>: gives you access to view calendars’ data, and to create/edit direct bookings</li>
+<li><code>pricing-management</code>: gives you access to view calendars’ data, and to suggest prices and minimum stay. <em>Note: this scope is intended only for partner pricing platforms that provide their own price-suggestion functionality. It is not provisioned to API partners by default — request it explicitly only if your integration produces price suggestions.</em></li>
+<li><code>smart-locks</code>: gives you access to view bookings and properties, and to assign smart locks access codes to them</li>
+<li><code>external-cleaning-management</code>: gives you access to view booking, properties and calendar data;</li>
+<li><code>reports</code>: gives you access to CSV report downloading;</li>
+</ul>
+</li>
+<li><strong>state=STATE</strong> - A random string generated by your application, which you'll verify later, when user will be redirected back to your <code>REDIRECT_URI</code>. This param is optional.</li>
+</ul>
+<p>The user sees the authorization prompt on the iGMS site where he can either allow or deny your request. If they deny authorization request, they will be redirected to the modified <code>REDIRECT_URI</code> having the <code>access_denied</code> value for the <code>error</code> parameter. If the user clicks "Allow," they will be redirected back to your site with an auth code:</p>
+<pre><code>https://example.org/path?code=AUTH_CODE&amp;state=STATE
+</code></pre>
+<ul>
+<li><strong>code=AUTH_CODE</strong> - Authorization code which you will use in the next step.</li>
+<li><p><strong>state=STATE</strong> - The server returns the same state value that you passed. If you have not set state in authorization request, redirect URI will not contain this parameter, too.</p>
+<p>  You should first compare this state value to ensure it matches the one you started with. You can typically store the state value in a cookie or session, and compare it when the user comes back. This ensures your redirection endpoint isn't able to be tricked into attempting to exchange arbitrary authorization codes.</p>
+</li>
+</ul>
+<h2>Getting an access token</h2>
+<p>Next step, your server exchanges the auth code for an access token. This step can be performed without any iGMS user participation, since they grant you authorization code required for this step. Create request to this endpoint (line breaks added for better readability):</p>
+<pre><code>https://igms.com/auth/token?
+    grant_type=authorization_code
+    &amp;code=AUTH_CODE
+    &amp;redirect_uri=REDIRECT_URI
+    &amp;client_id=CLIENT_ID
+    &amp;client_secret=CLIENT_SECRET
+</code></pre>
+<ul>
+<li><strong>grant_type=authorization_code</strong> - The grant type for this flow is <code>authorization_code</code>, the only correct value.</li>
+<li><strong>code=AUTH_CODE</strong> - This is the code you received in the previous step when user was redirected to your site.</li>
+<li><strong>redirect_uri=REDIRECT_URI</strong> - Must be identical to the redirect URI provided in the previous step.</li>
+<li><strong>client_id=CLIENT_ID</strong> - The client ID you received when you first created the application (labeled as "client_id" in the list of your applications).</li>
+<li><strong>client_secret=CLIENT_SECRET</strong> - Since this request is made from server-side code, the secret can be safely included. If client_secret has been set in application editor, this field should be included in the request and contain the same string. If client_secret has not been set for the app, the field should not be included in this request.</li>
+</ul>
+<p>iGMS server replies with an access token:</p>
+<pre><code>{
+    "access_token": "some-access-token"
+}
+</code></pre>
+<p>Or, if there was an error:</p>
+<pre><code>{
+    "error": "Incorrect application credentials"
+}
+</code></pre>
+<p>Now you can use received access token for making API requests. Access token allows you to make up to 1000 requests per minute.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 hidden-sm hidden-xs">
+                        <div class="sidebar js-sidebar-fixed">
+                            <!-- Vertical Menu -->
+                            <nav class="menu-vertical-wrapper">
+                                <ul
+                                    class="menu-vertical  js-menu-vertical"
+                                    data-prepend-to=".js-layout" data-select="Menu"
+                                >
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/index.html"
+                                        >
+                                            Introduction                                        </a>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/json-schema.html"
+                                        >
+                                            JSON Schema                                        </a>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/filters.html"
+                                        >
+                                            Filters                                        </a>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/errors.html"
+                                        >
+                                            Errors                                        </a>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class="selected"
+                                            href="/docs/airgms-api/getting-token.html"
+                                        >
+                                            Getting a Token                                        </a>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/methods/index.html"
+                                        >
+                                            Methods                                        </a>
+                                                                                <ul>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/get-properties.html"
+                                                >v1/get-properties</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/get-property.html"
+                                                >v1/get-property</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/propose-calendar-data.html"
+                                                >v1/propose-calendar-data</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/propose-calendar-batch.html"
+                                                >v1/propose-calendar-batch</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/reservation-report-csv.html"
+                                                >v1/reservation-report-csv</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/tasks-report-csv.html"
+                                                >v1/tasks-report-csv</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/company.html"
+                                                >v1/company</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/team-members.html"
+                                                >v1/team-members</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/listings.html"
+                                                >v1/listings</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/bookings.html"
+                                                >v1/bookings</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/guests.html"
+                                                >v1/guests</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/hosts.html"
+                                                >v1/hosts</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/tasks.html"
+                                                >v1/tasks</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/get-calendar-data.html"
+                                                >v1/get-calendar-data</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/message-booking-guest.html"
+                                                >v1/message-booking-guest</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/message-status.html"
+                                                >v1/message-status</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/set-listing-status.html"
+                                                >v1/set-listing-status</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/get-request-status.html"
+                                                >v1/get-request-status</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/set-calendar-batch.html"
+                                                >v1/set-calendar-batch</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/set-calendar-data.html"
+                                                >v1/set-calendar-data</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/book-property.html"
+                                                >v1/book-property</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v1/get-threads.html"
+                                                >v1/get-threads</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/book-property.html"
+                                                >v2/book-property</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/cancel-booking.html"
+                                                >v2/cancel-booking</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/accept-reservation.html"
+                                                >v2/accept-reservation</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/decline-reservation.html"
+                                                >v2/decline-reservation</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/get-direct-booking-content.html"
+                                                >v2/get-direct-booking-content</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-property-door-code.html"
+                                                >v2/set-property-door-code</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-booking-door-code.html"
+                                                >v2/set-booking-door-code</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-property-guidebook-link.html"
+                                                >v2/set-property-guidebook-link</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-booking-guidebook-link.html"
+                                                >v2/set-booking-guidebook-link</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-property-calendar-control.html"
+                                                >v2/set-property-calendar-control</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-property-calendar-availability.html"
+                                                >v2/set-property-calendar-availability</a>
+                                            </li>
+                                                                                        <li>
+                                                <a
+                                                    class=""
+                                                    href="/docs/airgms-api/methods/v2/set-booking-insurance-policy.html"
+                                                >v2/set-booking-insurance-policy</a>
+                                            </li>
+                                                                                    </ul>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/statuses.html"
+                                        >
+                                            Statuses                                        </a>
+                                                                            </li>
+                                                                        <li>
+                                        <a
+                                            class=""
+                                            href="/docs/airgms-api/webhooks.html"
+                                        >
+                                            Webhooks                                        </a>
+                                                                            </li>
+                                                                    </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer class="js-footer-is-fixed">
+        <!-- Footer Default -->
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12">
+                        <div class="footer-logo-wrapper">
+                            <!-- Logo Image -->
+                            <a href="/" class="logo-image ">
+                                <img src="/docs/assets/img/logos/logo.png" alt="iGMS" title="iGMS">
+                            </a>
+                            <!-- End of Logo Image -->
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <div class="footer-wrapper">
+                            <!-- Scroll top -->
+                            <span class="scroll-top js-scroll-top">
+                                <!--suppress CheckTagEmptyBody -->
+                                <i class="fa fa-angle-up"></i>
+                            </span>
+                            <!-- End of Scroll top -->
+                            <!-- Footer Menu -->
+                            <ul class="footer-menu helper right">
+                                <li>
+                                    <!--suppress HtmlUnknownTarget -->
+                                    <a href="/features/">Features</a>
+                                </li>
+                                <li>
+                                    <!--suppress HtmlUnknownTarget -->
+                                    <a href="/our-team/">About Us</a>
+                                </li>
+                                <li>
+                                    <!--suppress HtmlUnknownTarget -->
+                                    <a href="/pricing/">Pricing</a>
+                                </li>
+                                <li>
+                                    <a href="/app/login.html">My Account</a>
+                                </li>
+                                <li>
+                                    <!--suppress HtmlUnknownTarget -->
+                                    <a href="/blog/">Airbnb Tips</a>
+                                </li>
+                                <li>
+                                    <!--suppress HtmlUnknownTarget -->
+                                    <a href="/contact-us/">Contact</a>
+                                </li>
+                                <li>
+                                    <!--suppress HtmlUnknownTarget -->
+                                    <a href="/software/demo">Free Demo</a>
+                                </li>
+                            </ul>
+                            <!-- End of Footer Menu -->
+                            <!-- Copyright -->
+                            <p class="copyright helper right">
+                                iGMS, all rights reserved. © 2015-2019<br> <span style="font-size:12px; line-height: 12px; color: #555;"> Airbnb is a trademark of Airbnb, Inc., a company that is not affiliated with iGMS.<br> Cooperation with Airbnb is based on partnership and deep integration of iGMS with Airbnb platform. </span>
+                            <!-- End of Copyright -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Footer Default -->
+    </footer>
+    <!-- End of Footer -->
+</div>
+
+<!-- Facebook Pixel Code -->
+<!--suppress JSUnresolvedVariable -->
+<script>
+    !function (f, b, e, v, n, t, s) {
+        if (f.fbq)return;
+        n = f.fbq = function () {
+            n.callMethod ?
+                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s)
+    }(window,
+        document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+</script>
+<noscript>
+    <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=734508629991390&ev=PageView&noscript=1" alt=""/>
+</noscript>
+<!-- End Facebook Pixel Code -->
+
+<script src="/docs/assets/js/all.js"></script>
+<script src="/docs/assets/js/custom.js"></script>
+</body>
+</html>

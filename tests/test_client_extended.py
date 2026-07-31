@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from igms_wrapper.client import (
+    IGMSAPIError,
     IGMSClient,
     IGMSConfig,
     _has_next_page,
@@ -98,14 +99,35 @@ class RequestExtendedTests(unittest.TestCase):
 
         self.assertIs(raised.exception, expected)
 
-    def test_http_200_error_body_has_no_records_without_crashing(self):
+    def test_http_200_error_body_raises_instead_of_silent_empty(self):
         # iGMS sometimes reports application errors inside an HTTP 200 payload.
+        # A silent empty record list would let the message review print
+        # wakeAgent=false and skip a whole day — must RAISE (fail open).
         payload = {"error": {"code": "invalid_filter", "message": "Bad filter"}}
+        client, _ = make_client()
+
+        with self.assertRaises(IGMSAPIError) as raised:
+            client.collect_paginated(lambda page: payload)
+
+        self.assertIn("Bad filter", str(raised.exception))
+
+    def test_http_200_string_error_body_raises(self):
+        payload = {"error": "unauthorized"}
+        client, _ = make_client()
+
+        with self.assertRaises(IGMSAPIError):
+            client.collect_paginated(lambda page: payload)
+
+    def test_payload_with_data_key_is_not_treated_as_error(self):
+        # Some endpoints return {"error": ...} as a DATA field; only a
+        # top-level error WITHOUT data is a hard failure. Include meta so
+        # the paginator terminates (real iGMS responses always carry it).
+        payload = {"data": [{"error": "not really", "id": 1}], "meta": {"hasNextPage": False}}
         client, _ = make_client()
 
         records = client.collect_paginated(lambda page: payload)
 
-        self.assertEqual(records, [])
+        self.assertEqual(len(records), 1)
 
 
 class PayloadExtractionTests(unittest.TestCase):
@@ -274,6 +296,29 @@ class MessagingEndpointExtendedTests(unittest.TestCase):
             "platformType": "airbnb",
             "access_token": "token-123",
         })
+
+    def test_get_all_threads_fetches_all_pages_with_filters_on_each(self):
+        """Regression: a page-2 guest thread must not be dropped. Both page
+        calls must carry the camelCase filters and page increments."""
+        client, session = make_client([
+            FakeResponse({
+                "data": [{"threadId": "t1", "messages": [{"messageId": 1}]}],
+                "meta": {"hasNextPage": True},
+            }),
+            FakeResponse({
+                "data": [{"threadId": "t2", "messages": [{"messageId": 2}]}],
+                "meta": {"hasNextPage": False},
+            }),
+        ])
+
+        records = client.get_all_threads(fromDate="2026-07-24", toDate="2026-08-01")
+
+        self.assertEqual([r["threadId"] for r in records], ["t1", "t2"])
+        self.assertEqual(session.calls[0]["params"]["page"], 1)
+        self.assertEqual(session.calls[1]["params"]["page"], 2)
+        for call in session.calls:
+            self.assertEqual(call["params"]["fromDate"], "2026-07-24")
+            self.assertEqual(call["params"]["toDate"], "2026-08-01")
 
 
 if __name__ == "__main__":

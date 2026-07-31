@@ -2,33 +2,14 @@ from __future__ import annotations
 
 import contextlib
 import copy
-import importlib.util
 import io
 import json
 import sys
 import unittest
 from datetime import date
-from pathlib import Path
 from unittest import mock
 
-
-SCRIPT_PATH = Path(
-    "/Users/charleslab/.hermes/profiles/atlas/skills/productivity/"
-    "atlas-igms-messages/scripts/poll_igms_messages.py"
-)
-
-
-def load_script():
-    spec = importlib.util.spec_from_file_location("atlas_poll_igms_messages", SCRIPT_PATH)
-    if spec is None or spec.loader is None:
-        raise ImportError("Unable to load {}".format(SCRIPT_PATH))
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-poll_script = load_script()
+from igms_wrapper.poll_messages import main as poll_main
 
 
 class FixedDate(date):
@@ -75,13 +56,13 @@ class PollScriptTests(unittest.TestCase):
     def run_main(self, threads=None, argv=None):
         client = FakeClient(threads)
         stdout = io.StringIO()
-        args = [str(SCRIPT_PATH)] + list(argv or [])
-        with mock.patch.object(poll_script, "IGMSClient") as client_class, \
-                mock.patch.object(poll_script, "date", FixedDate), \
+        args = ["poll_igms_messages.py"] + list(argv or [])
+        with mock.patch.object(poll_main.__module__ and sys.modules["igms_wrapper.poll_messages"], "IGMSClient") as client_class, \
+                mock.patch.object(sys.modules["igms_wrapper.poll_messages"], "date", FixedDate), \
                 mock.patch.object(sys, "argv", args), \
                 contextlib.redirect_stdout(stdout):
             client_class.from_env.return_value = client
-            exit_code = poll_script.main()
+            exit_code = poll_main()
         return exit_code, stdout.getvalue(), client
 
     def test_guest_last_uses_messages_zero_not_last_item(self):

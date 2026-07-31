@@ -79,8 +79,29 @@ def _response_meta(payload: Any) -> dict[str, Any]:
     return meta if isinstance(meta, dict) else {}
 
 
+class IGMSAPIError(Exception):
+    """Raised when iGMS returns a top-level error payload (even with HTTP 200)."""
+
+
+def _raise_on_error_payload(payload: Any) -> None:
+    """iGMS can return HTTP 200 with a top-level `error` body (documented quirk).
+
+    Treat that as a hard failure instead of silently yielding zero records —
+    a silent empty result would let the message review print wakeAgent=false
+    and skip an entire day of guest messages.
+    """
+    if isinstance(payload, dict) and "error" in payload and "data" not in payload:
+        error = payload["error"]
+        if isinstance(error, dict):
+            message = error.get("message") or error.get("error") or str(error)
+        else:
+            message = str(error)
+        raise IGMSAPIError("iGMS API error: {}".format(message))
+
+
 def _records_from_payload(payload: Any) -> list[dict[str, Any]]:
     """Extract record list from an API response payload."""
+    _raise_on_error_payload(payload)
     if isinstance(payload, list):
         return [item for item in payload if isinstance(item, dict)]
     if not isinstance(payload, dict):

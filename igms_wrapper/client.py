@@ -223,8 +223,19 @@ class IGMSClient:
     def get_properties(self, page: int = 1) -> Any:
         return self.request("/api/v1/property", params={"page": page}).payload
 
-    def get_listings(self, page: int = 1) -> Any:
-        return self.request("/api/v1/listings", params={"page": page}).payload
+    def get_property(self, property_uid: str) -> Any:
+        """Get one property by its iGMS property UID.
+
+        This endpoint must not be called with a channel/listing UID.  If iGMS
+        has merged the property, its error payload includes ``newPropertyUid``
+        so callers can re-sync their inventory.
+        """
+        return self.request(f"/api/v1/property/{property_uid}").payload
+
+    def get_listings(self, page: int = 1, **filters: Any) -> Any:
+        """List channel listings, optionally filtered by documented fields."""
+        params = {"page": page, **filters}
+        return self.request("/api/v1/listings", params=params).payload
 
     def get_bookings(self, page: int = 1, **filters: Any) -> Any:
         params = {"page": page, **filters}
@@ -237,6 +248,13 @@ class IGMSClient:
             "to_date": to_date,
         }
         return self.request("/api/v1/get-calendar-data", params=params).payload
+
+    def get_request_status(self, request_uid: str | int) -> Any:
+        """Return the asynchronous status of a calendar/listing write."""
+        return self.request(
+            "/api/v1/get-request-status",
+            params={"request_uid": request_uid},
+        ).payload
 
     def get_threads(self, page: int = 1, **filters: Any) -> Any:
         params = {"page": page, **filters}
@@ -327,8 +345,12 @@ class IGMSClient:
     def get_all_properties(self, start_page: int = 1) -> list[dict[str, Any]]:
         return self.collect_paginated(self.get_properties, start_page=start_page)
 
-    def get_all_listings(self, start_page: int = 1) -> list[dict[str, Any]]:
-        return self.collect_paginated(self.get_listings, start_page=start_page)
+    def get_all_listings(self, start_page: int = 1, **filters: Any) -> list[dict[str, Any]]:
+        return self.collect_paginated(
+            self.get_listings,
+            start_page=start_page,
+            **filters,
+        )
 
     def get_all_bookings(self, start_page: int = 1, **filters: Any) -> list[dict[str, Any]]:
         return self.collect_paginated(self.get_bookings, start_page=start_page, **filters)

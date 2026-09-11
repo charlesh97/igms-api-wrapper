@@ -52,9 +52,17 @@ def build_parser() -> argparse.ArgumentParser:
     # Resource endpoints
     p_properties = sub.add_parser("properties", help="List properties")
     p_properties.add_argument("--page", type=int, default=1)
+    p_properties.add_argument("--all", action="store_true", dest="all_pages")
 
     p_listings = sub.add_parser("listings", help="List listings")
     p_listings.add_argument("--page", type=int, default=1)
+    p_listings.add_argument("--all", action="store_true", dest="all_pages")
+    p_listings.add_argument("--filters", help='JSON filter object, e.g. {"platform_type":"airbnb"}')
+
+    sub.add_parser(
+        "uid-inventory",
+        help="Show active property UIDs and their channel listing UIDs",
+    )
 
     p_bookings = sub.add_parser("bookings", help="List bookings")
     p_bookings.add_argument("--page", type=int, default=1)
@@ -116,11 +124,47 @@ def main(argv: list[str] | None = None) -> int:
         client = IGMSClient(config=config)
 
         if args.cmd == "properties":
-            _print_payload(client.get_properties(page=args.page))
+            payload = (
+                {"data": client.get_all_properties(start_page=args.page)}
+                if args.all_pages
+                else client.get_properties(page=args.page)
+            )
+            _print_payload(payload)
             return 0
 
         if args.cmd == "listings":
-            _print_payload(client.get_listings(page=args.page))
+            filters = _json_arg(args.filters)
+            payload = (
+                {"data": client.get_all_listings(start_page=args.page, **filters)}
+                if args.all_pages
+                else client.get_listings(page=args.page, **filters)
+            )
+            _print_payload(payload)
+            return 0
+
+        if args.cmd == "uid-inventory":
+            properties = client.get_all_properties()
+            listings = client.get_all_listings()
+            by_property: dict[str, list[dict[str, Any]]] = {}
+            for listing in listings:
+                uid = str(listing.get("property_uid") or "")
+                by_property.setdefault(uid, []).append({
+                    "platform_type": listing.get("platform_type"),
+                    "listing_uid": listing.get("listing_uid"),
+                    "listing_status": listing.get("listing_status"),
+                    "listing_name": listing.get("listing_name"),
+                })
+            inventory = []
+            for prop in properties:
+                uid = str(prop.get("property_uid") or "")
+                inventory.append({
+                    "property_uid": uid,
+                    "property_name": prop.get("name"),
+                    "is_active": bool(prop.get("is_active")),
+                    "calendar_control_allowed": prop.get("calendar_control_allowed"),
+                    "listings": by_property.get(uid, []),
+                })
+            _print_payload({"data": inventory})
             return 0
 
         if args.cmd == "bookings":

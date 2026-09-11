@@ -62,6 +62,37 @@ def make_client(responses=None):
 
 
 class RequestExtendedTests(unittest.TestCase):
+    def test_get_property_uses_property_uid_in_path(self):
+        client, session = make_client([FakeResponse({"data": {"property_uid": "p1"}})])
+
+        payload = client.get_property("p1")
+
+        self.assertEqual(payload["data"]["property_uid"], "p1")
+        self.assertEqual(session.calls[0]["url"], "https://www.igms.com/api/v1/property/p1")
+
+    def test_get_listings_passes_documented_filters(self):
+        client, session = make_client([FakeResponse({"data": []})])
+
+        client.get_listings(page=2, platform_type="airbnb", property_status="active")
+
+        self.assertEqual(session.calls[0]["params"], {
+            "page": 2,
+            "platform_type": "airbnb",
+            "property_status": "active",
+            "access_token": "token-123",
+        })
+
+    def test_get_request_status_passes_uid(self):
+        client, session = make_client([FakeResponse({"data": {"request_status": "completed"}})])
+
+        payload = client.get_request_status(17)
+
+        self.assertEqual(payload["data"]["request_status"], "completed")
+        self.assertEqual(session.calls[0]["params"], {
+            "request_uid": 17,
+            "access_token": "token-123",
+        })
+
     def test_request_passes_token_json_body_post_method_and_timeout(self):
         client, session = make_client([FakeResponse({"ok": True})])
 

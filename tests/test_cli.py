@@ -8,6 +8,19 @@ from igms_wrapper.cli import build_parser, main
 
 
 class CLITests(unittest.TestCase):
+    def test_uid_inventory_command_parses(self):
+        parser = build_parser()
+        args = parser.parse_args(["uid-inventory"])
+        self.assertEqual(args.cmd, "uid-inventory")
+
+    def test_listings_all_and_filters_parse(self):
+        parser = build_parser()
+        args = parser.parse_args([
+            "listings", "--all", "--filters", '{"platform_type":"airbnb"}',
+        ])
+        self.assertTrue(args.all_pages)
+        self.assertEqual(args.filters, '{"platform_type":"airbnb"}')
+
     def test_bookings_filters_argument_parses(self):
         parser = build_parser()
         args = parser.parse_args(["bookings", "--page", "2", "--filters", '{"booking_status":"accepted"}'])
